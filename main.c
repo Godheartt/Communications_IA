@@ -30,7 +30,7 @@ const char  BC_Subtile[] = "\t\t\t  Booking Creation\n";
 
 //Functions
 int Read_Line(FILE *file,double Line_Num);
-void createBookings();
+int createBookings();
 int Login();
 
 int main(void) {
@@ -71,7 +71,7 @@ int main(void) {
 }
 
 // Functions
-void createBookings() {
+int createBookings() {
     //Check entries
     char entry_checks[MAX_LENGTH];
     int entry_counter=0;
@@ -104,7 +104,7 @@ void createBookings() {
 
     // variables
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
-    int Hold =0,Querying=1;
+    int Num_Hold =0,Querying=1,UID;
     char Storage[MAX_LENGTH];
     char Questions[9][35] ={"Enter Activity No.#","Frist Name:","Last Name:","Person's age:","Phone No.#","Email Address :"
         ,"Number of persons Booking for:","Date in (dd/mm/yyyy) :","Time in (23:00):~"};
@@ -122,13 +122,15 @@ void createBookings() {
             printf("%s",Questions[i]);
             scanf("%s",Storage);
             switch (i) {
-                case 0:sscanf(Storage, "%d", &Hold);
-                    if (Hold != 0 && Hold < 11) {
+                case 0:sscanf(Storage, "%d", &Num_Hold);
+                    if (Num_Hold != 0 && Num_Hold < 11) {
                         Querying = 0;
-                        sprintf(Storage, "%s", acts[Hold-1]);// makes the booking number the word
-                        fprintf(IN_Bookings,"\nUID;%d%d\n",Hold,entry_counter);
-                        //Creates UID Using the activity number and
-                        //how many bookings were entered
+                        sprintf(Storage, "%d%d", Num_Hold,entry_counter);//Creates UID Using the activity number and
+                        fprintf(IN_Bookings,"\nUID;%s\n",Storage);       //how many bookings were entered
+                        sscanf(Storage, "%d", &UID);
+                        sprintf(Storage, "%s", acts[Num_Hold-1]);// makes the booking number the word
+
+
                     }else{printf("Error Not an Valid Entry\n");}
                     break;
 
@@ -146,8 +148,8 @@ void createBookings() {
                     break;
                 case 3:
                 case 6:
-                    sscanf(Storage, "%d", &Hold);//changes string to int and if it can't set the value to 0
-                    if (Hold != 0) {//checks if the change is succesful
+                    sscanf(Storage, "%d", &Num_Hold);//changes string to int and if it can't set the value to 0
+                    if (Num_Hold != 0) {//checks if the change is succesful
                         Querying = 0;
                     }else {printf("Error Not an Valid Entry\n");}
                     break;
@@ -174,8 +176,6 @@ void createBookings() {
             if (Querying == 0 ) {
                 fprintf(IN_Bookings, "%s\n",Storage);
             }
-
-
         }
     }
     fclose(IN_Bookings);
@@ -184,6 +184,9 @@ void createBookings() {
     fseek(Ed_Bookings, 0, SEEK_SET);
     fputs(entry_checks, Ed_Bookings);
     fclose(Ed_Bookings);
+    return UID;
+
+
 }
 
 int Read_Line(FILE *file,double Line_Num) {
