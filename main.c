@@ -24,14 +24,18 @@ struct Booking_Data {
     int  Participants;
     char Date[MAX_LENGTH];
     char Time[MAX_LENGTH];
+    int  Hours;
 }Booking_data;
-
 
 const char acts[10][19] ={
     "Hiking","Golfing","Scuba Diving",
     "Jet Skiing","Horse Backing","Kayaking",
     "Boat Tours","Forest Trails","Yoga on the Beach",
     "Spa-day on the reef"};
+
+const int act_cost[10]={//each correlates to the price of activities in acts per(session/hour)
+    250,150,100,200,175,100,200,175,75,75};
+
 //Displays
 const char  Top_Tile[]    = "\t\t    Welcome to sister island's\n";
 const char  Top_Subtile[] = "\t\t\t  Booking System\n";
@@ -45,26 +49,28 @@ const char  Emp_Screen[]  = "\t\t\t1---Create Booking\n\t\t\t2---View Current Bo
 const char  Adm_Screen[]  = "\t\t\t1---View Reports\n\t\t\t2---View Current Bookings\n\t\t\t3---Create Employee Accounts"
                             "\n\t\t\t4---EXIT\n";
 const char  BC_Subtile[]  = "\t\t\t  Booking Creation\n";
+const char  BCP_Subtile[]  = "\t\t\t  Booking Pricing\n";
 
 //Functions
 int Read_Line(FILE *file,double Line_Num);
 int createBookings();
-void BookingCosting(int UID);
+void BookingCosting(int UID,double Hours);
 int GrabBookings(int UID,int Fetch_type);
 int Login();
 
 int main(void) {
     int Account = 0;
     //Account = Login();
-    printf("%d\n",GrabBookings(32,0));
 
     //FILES
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
     fclose(IN_Bookings);
+    FILE *IN_Receipts = fopen("Receipts.txt", "a");
+    fclose(IN_Receipts);
 
     //Variables
     char In1[] = "Enter :-",Store[50];
-    int Hold= 0,
+    int Hold= 0,UID,
     Checked = 1,
     Running= 1;
     while (Running == 1) {
@@ -79,11 +85,14 @@ int main(void) {
                 sscanf(Store, "%d", &Hold);
                 switch (Hold) {
                     case 1:
-                        BookingCosting(createBookings());
+                        UID = createBookings();
+                        BookingCosting(UID,Booking_data.Hours);
+                        printf("%d",Booking_data.Hours);
                         Checked = 0;
                         break;
                     case 2:
                         Checked = 0;
+                        BookingCosting(85,5);
                         break;
                     case 3:
                         Checked = 0;
@@ -166,11 +175,12 @@ int createBookings() {
 
     // variables
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
-    int Num_Hold =0,Querying=0,UID;
+    int Num_Hold =0,Querying=0,
+    UID,activity = 1;
     char Storage[MAX_LENGTH];
     char FStorage[MAX_LENGTH*9];
     char Questions[9][35] ={"Enter Activity No.#","Frist Name:","Last Name:","Person's age:","Phone No.#","Email Address :"
-        ,"Number of persons Booking for:","Date in (dd/mm/yyyy) :","Time in (23:00):~"};
+        ,"Number of persons Booking for:","Booking Date (dd/mm/yyyy) :","Time in (23:00):~"};
 
     printf("%s%s%s%sActivities\n1--%s\t   2--%s\t\t3--%s\n"
            "4--%s\t   5--%s\t6--%s\n7--%s\t   8--%s\t9--%s\n\t       10--%s\n\nEnter clients Info:\n",
@@ -193,7 +203,7 @@ int createBookings() {
                         sscanf(FStorage, "%d", &UID);//and how many bookings were entered
                         sprintf(FStorage, "\nUID;%d",UID);//copies UID
                         sprintf(Storage, "%s", acts[Num_Hold-1]);// makes the booking number the word
-
+                        activity = Num_Hold;
 
                     }else{printf("Error Not an Valid Entry\n");}
                     break;
@@ -247,6 +257,31 @@ int createBookings() {
                 sprintf(FStorage,"%s\n%s",FStorage,Storage);
             }
         }
+    }
+    if (activity != 1 && activity != 7 && activity != 8) {
+        double hours;
+        Querying = 1;
+        while (Querying == 1) {
+            printf("How many hour to be booked");
+            if (activity > 8) {
+                printf(" (5-Hours MAX):-\n");
+            }else {
+                printf(" (3-Hours MAX):-\n");
+            }
+            scanf("%s",Storage);
+            sscanf(Storage, "%lf", &hours);
+            if (Num_Hold > 0 && Num_Hold < 6 && activity > 8) {
+                Booking_data.Hours = Num_Hold;
+                Querying = 0;
+            }else if (Num_Hold > 0 && Num_Hold < 4 ) {
+                Booking_data.Hours = Num_Hold;
+                Querying = 0;
+            }
+        }
+
+    }else {
+        Booking_data.Hours = 1;
+
     }
 
 
@@ -316,30 +351,29 @@ int Login() {
     return 0;
 }
 
-void BookingCosting(int UID) {
-
-}
 
 int GrabBookings(int UID,int Fetch_type) {
     //Fetch_type 0-reads information on amount of person and activity
     //type       1-reads the Fullname, date and time, along with info from type 0
     //type       2-reads ALL Information
     //the Information is stored in Booking_data
+
+    //variables
     FILE *READ_Bookings = fopen("Bookings.txt","r");
     double line_num = 2;
-    int found = 0;
-    char Storage[MAX_LENGTH];
-    int  Hold =1;
+    int found = 0,
+    Hold = 1;
+    char Storage[MAX_LENGTH],
+    str_end ='\0';//ends the string deleting all chars to the right
+
     while (found == 0) {
         if (Read_Line(READ_Bookings, line_num)!=0) {
-
             sprintf(Storage, "%s",READL);
             Storage[strcspn(Storage, "U")] = '0';
             Storage[strcspn(Storage, "I")] = '0';
             Storage[strcspn(Storage, "D")] = '0';
             Storage[strcspn(Storage, ";")] = '0';
             Storage[strcspn(Storage, "\n")] = '\0';//remove \n and UID; from the str
-            printf("%c",Storage[4]);
             sscanf(Storage,"%d",&Hold);
             if (Hold == UID) {
                 found = 1;
@@ -352,20 +386,131 @@ int GrabBookings(int UID,int Fetch_type) {
     }
     if (found == 1) {
         switch (Fetch_type) {
+            case 2:
+                //gets info for Age
+                Read_Line(READ_Bookings,line_num+4);
+                sscanf(READL, "%d",&Hold);
+                Booking_data.Age = Hold;
+                //gets info for Phone Number
+                Read_Line(READ_Bookings,line_num+5);
+                sprintf(Storage, "%s",READL);
+                Storage[strcspn(Storage, "\n")] = '\0';
+                sprintf(Booking_data.Phone_Num,"%s",Storage);
+                //gets info for Email
+                Read_Line(READ_Bookings,line_num+6);
+                sprintf(Storage, "%s",READL);
+                Storage[strcspn(Storage, "\n")] = '\0';
+                sprintf(Booking_data.Email,"%s",Storage);
+            case 1:
+                Hold = 0;
+
+                //gets info for FName
+                Read_Line(READ_Bookings,line_num+2);
+                sprintf(Storage, "%s",READL);
+                Storage[strcspn(Storage, "\n")] = '\0';
+                sprintf(Booking_data.FName,"%s",Storage);
+                //gets info for LName
+                Read_Line(READ_Bookings,line_num+3);
+                sprintf(Storage, "%s",READL);
+                Storage[strcspn(Storage, "\n")] = '\0';
+                sprintf(Booking_data.LName,"%s",Storage);
+                //gets info for Date
+                Read_Line(READ_Bookings,line_num+8);
+                sprintf(Storage, "%s",READL);
+                Storage[strcspn(Storage, "\n")] = '\0';
+                sprintf(Booking_data.Date,"%s",Storage);
+                //gets info for Time
+                Read_Line(READ_Bookings,line_num+9);
+                sprintf(Storage, "%s",READL);
+                Storage[strcspn(Storage, "\n")] = '\0';
+                sprintf(Booking_data.Time,"%s",Storage);
+
             case 0:
                 Hold = 0;
-                Storage[strcspn(Storage, )] = '0';
+
+                //gets info for activity
+                sprintf(Storage,"%d",UID);
+                Storage[1] = str_end;
+                sscanf(Storage, "%d",&Hold);
+                Booking_data.Activity = Hold;
+                Hold = 0;
+
+                //gets info for Participants
                 Read_Line(READ_Bookings,line_num+7);
                 sscanf(READL, "%d",&Hold);
                 Booking_data.Participants = Hold;
-                printf("%d",Booking_data.Participants);
+
+                /*printf("%d\n%d\n%d\n%s\n%s\n%s\n%s\n%s\n%s\n",
+                    Booking_data.Activity,Booking_data.Participants,Booking_data.Age,Booking_data.FName,Booking_data.LName
+                    ,Booking_data.Date,Booking_data.Time,Booking_data.Email,Booking_data.Phone_Num);*/
                 break;
-            case 1:
-            case 2:
-                break;
+            default:break;
 
         }
     }
     fclose(READ_Bookings);
     return found;
+}
+
+void BookingCosting(int UID,double Hours) {
+    printf("%s%s%s%s",TAB_divider,Top_Tile,BCP_Subtile,Top_divider);
+    double Price;
+    int paid = 1;
+    char percent_sign = '%',store[1];
+    GrabBookings(UID,0);
+    if (Booking_data.Participants > 5) {//25% Discount
+        printf("BOOKING COST:\n\t Hours :%.0lf\n\t Participants :%d\n\t = %.0lf x %d x Cost",
+            Hours,Booking_data.Participants,Hours,Booking_data.Participants);
+        Price = Hours * Booking_data.Participants ;
+        printf("\n\t = %.0lf x Cost\n\t Cost = $%d \n\t SubTotal = %.0lf x $%d",
+            Price,act_cost[Booking_data.Activity-1],Price,act_cost[Booking_data.Activity-1]);
+        Price = Price * act_cost[Booking_data.Activity-1];
+        printf("\n\t SubTotal = $%.2lf \n\t Total = $%.2lf - (25%c--DISCOUNT)",Price,Price,percent_sign);
+        Price = Price * 0.85;
+        printf("\n\t TOTAL = $%.2lf\n\n",Price);
+    }else if (Booking_data.Participants > 2) {//10% Discount
+        printf("BOOKING COST:\n\t Hours :%.0lf\n\t Participants :%d\n\t = %.0lf x %d x Cost",
+            Hours,Booking_data.Participants,Hours,Booking_data.Participants);
+        Price = Hours * Booking_data.Participants ;
+        printf("\n\t = %.0lf x Cost\n\t Cost = $%d \n\t SubTotal = %.0lf x $%d",
+            Price,act_cost[Booking_data.Activity-1],Price,act_cost[Booking_data.Activity-1]);
+        Price = Price * act_cost[Booking_data.Activity-1];
+        printf("\n\t SubTotal = $%.2lf \n\t Total = $%.2lf - (10%c--DISCOUNT)",Price,Price,percent_sign);
+        Price = Price * 0.9;
+        printf("\n\t TOTAL = $%.2lf\n\n",Price);
+    }else {//No Discount
+        printf("BOOKING COST:\n\t Hours :%.0lf\n\t Participants :%d\n\t = %.0lf x %d x Cost",
+            Hours,Booking_data.Participants,Hours,Booking_data.Participants);
+        Price = Hours * Booking_data.Participants ;
+        printf("\n\t = %.0lf x Cost\n\t Cost = $%d \n\t Total = %.0lf x $%d",
+            Price,act_cost[Booking_data.Activity-1],Price,act_cost[Booking_data.Activity-1]);
+        Price = Price * act_cost[Booking_data.Activity-1];
+        printf("\n\t TOTAL = $%.2lf\n\n",Price);
+    }
+    while(TRUE) {
+        printf("\t1--PAYMENT PAID\n\t2--PENDING PAYMENT\n");
+        scanf("%c",store);
+        sscanf(store,"%d",&paid);
+        if (paid > 0 && paid < 3) {
+            FILE *IN_Receipts = fopen("Receipts.txt", "a");
+            fprintf(IN_Receipts, "%d\n",UID);
+            fprintf(IN_Receipts, "%lf\n",Hours);
+            fprintf(IN_Receipts, "%lf\n",Price);
+            if (paid == 1) {
+                fprintf(IN_Receipts, "PAID\n");
+            }else {
+                fprintf(IN_Receipts, "PENDING\n");
+            }
+
+
+            fclose(IN_Receipts);
+        }
+
+        break;
+    }
+
+
+
+
+
 }
