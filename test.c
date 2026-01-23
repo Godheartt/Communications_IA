@@ -14,11 +14,11 @@ const char acts[10][19] ={
 const char  Top_Tile[]    = "\t\t    Welcome to sister island's\n";
 const char  Top_Subtile[] = "\t\t\t  Booking System\n";
 const char  Top_divider[] = "********************************************************************************\n";
-const char  divider1[]    = "--------------------------------------------------------------------------------\n"
+const char  TAB_divider[]    = "--------------------------------------------------------------------------------\n"
                             "------------------------------------NEW--TAB------------------------------------\n"
                             "--------------------------------------------------------------------------------\n\n";
 //Screen layouts :
-const char  Empscreen1[]    = "\t\t\t1---Create Booking\n\t\t\t2---View Current Bookings\n\t\t\t3---Cancel Booking\n";
+const char  Emp_Screen[]    = "\t\t\t1---Create Booking\n\t\t\t2---View Current Bookings\n\t\t\t3---Cancel Booking\n";
 const char  BC_Subtile[] = "\t\t\t  Booking Creation\n";
 
 
@@ -52,7 +52,7 @@ int main() {
 
     printf("%s%s%s%sActivities\n1--%s\t   2--%s\t\t3--%s\n"
            "4--%s\t   5--%s\t6--%s\n7--%s\t   8--%s\t9--%s\n\t       10--%s\n\nEnter clients Info:\n",
-        divider1,Top_Tile,BC_Subtile,Top_divider,acts[0],acts[1],acts[2],acts[3],acts[4],acts[5],acts[6]
+        TAB_divider,Top_Tile,BC_Subtile,Top_divider,acts[0],acts[1],acts[2],acts[3],acts[4],acts[5],acts[6]
         ,acts[7],acts[8],acts[9]);
 
 
