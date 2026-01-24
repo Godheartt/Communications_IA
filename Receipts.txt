@@ -1,0 +1,7 @@
+85
+Hours :5.0
+Participants :17
+Cost :$175
+Discounted--25%
+12643.75
+PAID
