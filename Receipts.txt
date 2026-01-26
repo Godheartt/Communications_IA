@@ -1,7 +1,16 @@
-85
-Hours :5.0
-Participants :17
-Cost :$175
+91
+Hours :4
+Participants :9
+Cost :$75
 Discounted--25%
-12643.75
+2295.00
 PAID
+
+12
+Hours :1
+Participants :6
+Cost :$250
+Discounted--25%
+1275.00
+PENDING
+
