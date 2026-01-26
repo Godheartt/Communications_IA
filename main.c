@@ -59,6 +59,12 @@ void Booking_Costing(int UID,int Hours);
 int Grab_Bookings(int UID,int Fetch_type);
 int Read_Line(FILE *file,double Line_Num);
 
+//to make
+void Full_Booking_View(int UID);
+void Cancel_Booking(int UID);
+void Create_Employees_logins();
+void Reports();
+
 int main(void) {
     int Account = 0;
     //Account = Login();
@@ -537,11 +543,9 @@ void Activity_View() {
         printf(" %s %s , %s , %s\n",Booking_data.FName,Booking_data.LName,Booking_data.Phone_Num,Booking_data.Date);
         printf("%s",View_divider);
 
-
-
-
         line_num = line_num +11;
     }
+
 
 
     if (line_num == 2) {
