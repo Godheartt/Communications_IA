@@ -27,6 +27,15 @@ struct Booking_Data {
     int  Hours;
 }Booking_data;
 
+struct Receipts_Data {
+    int    Hours;
+    int    Participants;
+    int    Cost;
+    char   Discount[MAX_LENGTH];
+    double Total_Cost;
+    char   Payment_status[MAX_LENGTH];
+}Receipts_data;
+
 const char acts[9][19] ={
     "Hiking","Golfing","Scuba Diving",
     "Jet Skiing","Horse Backing","Kayaking",
@@ -37,7 +46,7 @@ const int act_cost[10]={//each correlates to the price of activities in acts per
 
 //Displays
 const char  Top_Tile[]    = "\t\t    Welcome to sister island's\n";
-const char  Top_Subtile[] = "\t\t\t  Booking System\n";
+const char  Top_Subtitle[] = "\t\t\t  Booking System\n";
 const char  Top_divider[] = "********************************************************************************\n";
 const char  View_divider[]= "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 const char  TAB_divider[] = "--------------------------------------------------------------------------------\n"
@@ -48,8 +57,9 @@ const char  Emp_Screen[]  = "\t\t\t1---Create Booking\n\t\t\t2---View Current Bo
                             "\n\t\t\t4---EXIT\n";
 const char  Adm_Screen[]  = "\t\t\t1---View Reports\n\t\t\t2---View Current Bookings\n\t\t\t3---Create Employee Accounts"
                             "\n\t\t\t4---EXIT\n";
-const char  BC_Subtile[]  = "\t\t\t  Booking Creation\n";
-const char  BCP_Subtile[]  = "\t\t\t  Booking Pricing\n";
+const char  BC_Subtitle[] = "\t\t\t  Booking Creation\n";
+const char  BCP_Subtitle[]= "\t\t\t  Booking Pricing\n";
+const char  CB_Subtitle[] = "\t\t\t Current Bookings\n";
 
 //Functions
 int Login();
@@ -60,8 +70,7 @@ int Grab_Bookings(int UID,int Fetch_type);
 int Read_Line(FILE *file,double Line_Num);
 
 //to make
-void Full_Booking_View(int UID);
-void Cancel_Booking(int UID);
+int Cancel_Booking(int UID);
 void Create_Employees_logins();
 void Reports();
 
@@ -84,7 +93,7 @@ int main(void) {
         Checked = 1;
         if (Account == 0) {
             printf("%s%s%s%s",
-                Top_Tile,Top_Subtile,Top_divider,Emp_Screen);
+                Top_Tile,Top_Subtitle,Top_divider,Emp_Screen);
             while (Checked ==1) {
                 Hold =0;
                 printf("%s",In1);
@@ -114,7 +123,7 @@ int main(void) {
             }
         }else {
             printf("%s%s%s%s",
-                Top_Tile,Top_Subtile,Top_divider,Adm_Screen);
+                Top_Tile,Top_Subtitle,Top_divider,Adm_Screen);
             while (Checked ==1) {
                 Hold =0;
                 printf("%s",In1);
@@ -142,7 +151,6 @@ int main(void) {
         }
     }
 
-    Sleep(2000);
     return 0;
 }
 
@@ -190,7 +198,7 @@ int Create_Bookings() {
 
     printf("%s%s%s%sActivities\n1--%s\t   2--%s\t\t3--%s\n"
            "4--%s\t   5--%s\t6--%s\n7--%s\t   8--%s\t9--%s\n\nEnter clients Info:\n",
-        TAB_divider,Top_Tile,BC_Subtile,Top_divider,acts[0],acts[1],acts[2],acts[3],acts[4],acts[5],acts[6]
+        TAB_divider,Top_Tile,BC_Subtitle,Top_divider,acts[0],acts[1],acts[2],acts[3],acts[4],acts[5],acts[6]
         ,acts[7],acts[8]);
     //print the screen along with activities
 
@@ -317,7 +325,7 @@ int Read_Line(FILE *file,double Line_Num) {
 
 int Login() {
     //Variables
-    printf("%s%s%sENTER LOGIN CREDENTIALS\n",Top_Tile,Top_Subtile,Top_divider);
+    printf("%s%s%sENTER LOGIN CREDENTIALS\n",Top_Tile,Top_Subtitle,Top_divider);
     int PASSED = 0;
     char Password[50],Username[50];
     while (PASSED == 0) {
@@ -357,12 +365,16 @@ int Login() {
 int Grab_Bookings(int UID,int Fetch_type) {
     //Fetch_type 0-reads information on amount of person and activity
     //type       1-reads the Fullname, date and phone number, along with info from type 0
-    //type       2-reads ALL Information
+    //type       2-reads ALL Information for booking including Cost, discount and Payment status
+    //type       3-reads Report data
     //the Information is stored in Booking_data
 
     //variables
     FILE *READ_Bookings = fopen("Bookings.txt","r");
+    FILE *READ_Receipts;
     double line_num = 2;//UID start 3 line away from the top
+    double Receipts_line_Num=0;
+    double Holder;
     int found = 0,
     Hold = 1;
     char Storage[MAX_LENGTH],
@@ -389,6 +401,33 @@ int Grab_Bookings(int UID,int Fetch_type) {
     if (found == 1) {
         switch (Fetch_type) {
             case 2:
+                READ_Receipts= fopen("Receipts.txt","r");
+                while (Read_Line(READ_Receipts,Receipts_line_Num)!=0) {
+                    sprintf(Storage, "%s",READL);
+                    Storage[strcspn(Storage, "\n")] = '\0';//remove \n and UID; from the str
+                    sscanf(Storage,"%d",&Hold);
+                    if (Hold == UID) {
+                        break;
+                    }
+                    Receipts_line_Num = Receipts_line_Num +8;
+                }
+                //gets info for Total
+                Read_Line(READ_Receipts,Receipts_line_Num+5);
+                sscanf(READL, "%lf",&Holder);
+                Receipts_data.Total_Cost = Holder;
+                //gets info for Discount
+                Read_Line(READ_Receipts,Receipts_line_Num+4);
+                sprintf(Storage, "%s",READL);
+                Storage[strcspn(Storage, "\n")] = '\0';
+                sprintf(Receipts_data.Discount,"%s",Storage);
+                //gets info for Payment_status
+                Read_Line(READ_Receipts,Receipts_line_Num+6);
+                sprintf(Storage, "%s",READL);
+                Storage[strcspn(Storage, "\n")] = '\0';
+                sprintf(Receipts_data.Payment_status,"%s",Storage);
+                //close the file
+                fclose(READ_Receipts);
+
 
                 //gets info for Age
                 Read_Line(READ_Bookings,line_num+4);
@@ -456,7 +495,7 @@ int Grab_Bookings(int UID,int Fetch_type) {
 }
 
 void Booking_Costing(int UID,int Hours) {
-    printf("%s%s%s%s",TAB_divider,Top_Tile,BCP_Subtile,Top_divider);
+    printf("%s%s%s%s",TAB_divider,Top_Tile,BCP_Subtitle,Top_divider);
     double Price;
     int paid = 1;
     char percent_sign = '%',store[1],Discount[50];
@@ -523,11 +562,16 @@ void Activity_View() {
     //variables
     FILE *READ_Bookings = fopen("Bookings.txt","r");
     int line_num = 2//UID start 3 line away from the top
-    , UID = 1;
+    , UID = 1,Hold;
     char Storage[MAX_LENGTH];
 
-    while (Read_Line(READ_Bookings, line_num)!=0) {
+    printf("%s%s%s%s\n",
+                TAB_divider,Top_Tile,CB_Subtitle,Top_divider);
 
+    while (Read_Line(READ_Bookings, line_num)!=0) {
+        if (line_num != 2) {//for better looking GUI
+            printf("%s",View_divider);
+        }
         //Get UID
         sprintf(Storage, "%s",READL);
         Storage[strcspn(Storage, "U")] = '0';
@@ -539,19 +583,62 @@ void Activity_View() {
 
         //Get Some Booking Data
         Grab_Bookings(UID,1);
-        printf("%s \t\t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
+        if (Booking_data.Activity == 9) {
+            printf("%s \t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
+        }else {
+            printf("%s \t\t\t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
+        }
         printf(" %s %s , %s , %s\n",Booking_data.FName,Booking_data.LName,Booking_data.Phone_Num,Booking_data.Date);
-        printf("%s",View_divider);
 
         line_num = line_num +11;
     }
-
-
-
+    printf("\n%s",Top_divider);
     if (line_num == 2) {
         printf("Sorry no Bookings Found...\n");
         Sleep(500);
+    }else {
+        printf("Enter (-1) to EXIT\n");
+        while (TRUE) {
+            printf(" Enter booking ID...");
+            scanf("%s",Storage);
+            sscanf(Storage,"%d",&UID);
+            if (UID == -1) {
+                printf("Closing Program...\n");
+                Sleep(500);
+                break;
+            }
+            if (UID != 0){
+                if (Grab_Bookings(UID,2) != 0) {
+                    printf("%s\n",Top_divider);
+                    if (Booking_data.Activity == 9) {
+                        printf("Event Booked : %s \t Booking Details \nBooking UID# %d ",
+                               acts[Booking_data.Activity-1],UID);
+                    }else{
+                        printf("Event Booked : %s \t\t\t Booking Details \nBooking UID# %d ",
+                               acts[Booking_data.Activity-1],UID);}
+
+                    printf("\t\t\t ---------------\n---------------");
+                    printf("\t\t\t\t Name: %s %s  \nPress : 1--Confirm Payment \t\t Age: %d\n\t2--Cancel \t\t\t No.# %s \n\t"
+                           "3--Cancel \t\t\t Participants : %d  \n",
+                           Booking_data.FName,Booking_data.LName,Booking_data.Age,Booking_data.Phone_Num,Booking_data.Participants);
+                    printf("\t\t\t\t\t Date : %s \n\t\t\t\t\t Time : %s\n",
+                           Booking_data.Date,Booking_data.Time);
+                    printf("\t\t\t\t\t Payment Status : %s \n\t\t\t\t\t %s \n\t\t\t\t\t Total Cost :$%0.2lf\n",
+                           Receipts_data.Payment_status,Receipts_data.Discount,Receipts_data.Total_Cost);
+
+                    while (TRUE) {
+                        printf("Enter...");
+                        scanf("%s",Storage);
+                        sscanf(Storage,"%d",&UID);
+                    }
+
+                }else{
+                    printf("Error UID Not Found\n");
+                }
+            }
+        }
     }
+
     fclose(READ_Bookings);
     printf("%s",TAB_divider);
 }
