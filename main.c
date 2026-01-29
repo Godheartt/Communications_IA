@@ -77,7 +77,7 @@ void Reports();
 
 int main(void) {
     int Account = 0;
-    Account = Login();
+    //Account = Login();
 
     //FILES
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
@@ -418,6 +418,9 @@ int Grab_Bookings(int UID,int Fetch_type) {
     }
     if (found == 1) {
         switch (Fetch_type) {
+            case 3:
+
+                break;
             case 2:
                 READ_Receipts= fopen("Receipts.txt","r");
                 while (Read_Line(READ_Receipts,Receipts_line_Num)!=0) {
@@ -560,16 +563,16 @@ void Booking_Costing(int UID,int Hours) {
         sscanf(store,"%d",&paid);
         if (paid > 0 && paid < 3) {
             FILE *IN_Receipts = fopen("Receipts.txt", "a");
-            fprintf(IN_Receipts, "%d\n",UID);
+            fprintf(IN_Receipts, "\n%d\n",UID);
             fprintf(IN_Receipts, "Hours :%d\n",Hours);
             fprintf(IN_Receipts, "Participants :%d\n",Booking_data.Participants);
             fprintf(IN_Receipts, "Cost :$%d\n",act_cost[Booking_data.Activity-1]);
             fprintf(IN_Receipts, "%s\n",Discount);
             fprintf(IN_Receipts, "%.2lf\n",Price);
             if (paid == 1) {
-                fprintf(IN_Receipts, "PAID\n\n");
+                fprintf(IN_Receipts, "PAID\n");
             }else {
-                fprintf(IN_Receipts, "PENDING\n\n");
+                fprintf(IN_Receipts, "PENDING\n");
             }
             fclose(IN_Receipts);
             break;
@@ -605,7 +608,9 @@ void Activity_View() {
         Grab_Bookings(UID,1);
         if (Booking_data.Activity == 9) {
             printf("%s \t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
-        }else {
+        }else if (Booking_data.Activity == 5) {
+            printf("%s \t\t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
+        }else{
             printf("%s \t\t\t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
         }
         printf(" %s %s , %s , %s\n",Booking_data.FName,Booking_data.LName,Booking_data.Phone_Num,Booking_data.Date);
@@ -631,7 +636,7 @@ void Activity_View() {
             if (UID != 0){
                 if (Grab_Bookings(UID,2) != 0) {
                     printf("%s\n",Top_divider);
-                    if (Booking_data.Activity == 9) {
+                    if (Booking_data.Activity ) {
                         printf("Event Booked : %s \t Booking Details \nBooking UID# %d ",
                                acts[Booking_data.Activity-1],UID);
                     }else{
@@ -761,7 +766,7 @@ int Cancel_Booking(int UID) {
     fclose(Temp_file);
     remove("Bookings.txt");
     rename("temp.txt", "Bookings.txt");
-    printf("Booking Updated successfully...\n");
+    printf("Booking Cancelled successfully...\n");
     printf("%s\n",Top_divider);
     Sleep(600);
     return 1;
@@ -835,3 +840,4 @@ void Change_status(int UID) {
     printf("%s\n",Top_divider);
     Sleep(600);
 }
+

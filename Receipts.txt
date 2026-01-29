@@ -13,3 +13,35 @@ Cost :$250
 Discounted--25%
 1275.00
 PAID
+
+53
+Hours :2
+Participants :2
+Cost :$75
+NO-Discount
+300.00
+PAID
+
+54
+Hours :3
+Participants :3
+Cost :$75
+Discounted--10%
+607.50
+PAID
+
+25
+Hours :3
+Participants :1
+Cost :$150
+NO-Discount
+450.00
+PENDING
+
+66
+Hours :3
+Participants :3
+Cost :$125
+Discounted--10%
+1012.50
+PAID
