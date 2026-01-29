@@ -69,16 +69,15 @@ void Booking_Costing(int UID,int Hours);
 int Grab_Bookings(int UID,int Fetch_type);
 int Read_Line(FILE *file,double Line_Num);
 void Change_status(int UID);
+int Cancel_Booking(int UID);
 
 //to make
-int Cancel_Booking(int UID);
 void Create_Employees_logins();
 void Reports();
 
 int main(void) {
     int Account = 0;
-    //Account = Login();
-    Cancel_Booking(12);
+    Account = Login();
 
     //FILES
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
@@ -112,7 +111,22 @@ int main(void) {
                         Activity_View();
                         break;
                     case 3:
-                        Checked = 0;
+                        printf("Please Enter the UID of the Booking to Cancel\n" );
+                        while (TRUE) {
+                            Hold = 0;
+                            printf("Enter (-1) to exit\n");
+                            printf(" Enter...");
+                            scanf("%s",Store);
+                            sscanf(Store, "%d", &Hold);
+                            if (Hold != 0 && Cancel_Booking(Hold) != 0 || Hold == -1) {//executes cancel
+                                Checked = 0;
+                                Sleep(200);
+                                printf("%s",TAB_divider);
+                                break;
+                            }else {
+                                printf("Invalid UID\n");
+                            }
+                        }
                         break;
                     case 4://ends Program
                         Running = 0;
@@ -137,8 +151,10 @@ int main(void) {
                         break;
                     case 2:
                         Checked = 0;
+                        Activity_View();
                         break;
                     case 3:
+
                         Checked = 0;
                         break;
                     case 4://ends Program
@@ -674,38 +690,13 @@ int Cancel_Booking(int UID) {
 
     int line_Num = 2,
     Current_line = 0,
-    Hold;
+    Hold, found = 0;
     char Storage[MAX_LENGTH];
 
-    /*char entry_checks[MAX_LENGTH];
-    int entry_counter=0;
-    FILE *Ed_Bookings = fopen("Bookings.txt", "r+");//opens file in both read and write mode
-    if ((Read_Line(Ed_Bookings, 0))!=0) {//reads frist line
+    char entry_checks[MAX_LENGTH];
+    int entry_counter = 0 ;
 
-        sprintf(entry_checks, "%s", READL);//copies READL
-        entry_checks[strcspn(entry_checks, "\n")] = '\0';// Removes the \n in the str
-
-        sscanf(entry_checks, "%d", &entry_counter);
-        if (entry_counter == 0){
-            entry_counter++;
-            printf("Creating counter....\n");
-            Sleep(600);
-        }
-        else {
-            entry_counter++;
-        }
-
-    }
-    else {
-        entry_counter++;
-        fprintf(Ed_Bookings,"0\n");
-        printf("Creating counter....\n");
-        Sleep(600);
-    }
-    fclose(Ed_Bookings);*/
-
-
-
+    //Finds UID
     while (Read_Line(ED_Bookings,line_Num)!=0) {
         sprintf(Storage, "%s",READL);
         Storage[strcspn(Storage, "U")] = '0';
@@ -716,11 +707,30 @@ int Cancel_Booking(int UID) {
         sscanf(Storage,"%d",&Hold);
 
         if (Hold == UID) {
+            found = 1;
             break;
         }
 
         line_Num = line_Num +11;
     }
+    if (found == 0) {
+        return 0;
+    }
+
+
+    //collects to count on the top of the file and decreases it
+    if ((Read_Line(ED_Bookings, 0))!=0) {//reads frist line
+
+        sprintf(entry_checks, "%s", READL);//copies READL
+        entry_checks[strcspn(entry_checks, "\n")] = '\0';// Removes the \n in the str
+
+        sscanf(entry_checks, "%d", &entry_counter);
+        if (entry_counter != 0){
+            entry_counter--;
+        }
+    }
+
+
     if (Read_Line(ED_Bookings,line_Num+11 )==0) {//check if this is the last entry and pushes the pointer back
         line_Num--;                              //to aviod formating issues
     }
@@ -735,18 +745,18 @@ int Cancel_Booking(int UID) {
         if (!feof(ED_Bookings))
         {
 
-            if (Current_line >= line_Num  && Current_line <= (line_Num + 10 ))
-            {
-                printf("1");
-            }
-            else
-            {
+            if (Current_line < line_Num  || Current_line > (line_Num + 10 )) {
                 fprintf(Temp_file, "%s", Storage);
-
             }
             Current_line++;
         }
     }
+
+    //write values to the temporary file
+    sprintf(entry_checks, "%d", entry_counter );//copies entry_counter
+    fseek(Temp_file, 0, SEEK_SET);//place the writer o the frist line
+    fputs(entry_checks, Temp_file);//writes the contents of entry_checks
+
     fclose(ED_Bookings);
     fclose(Temp_file);
     remove("Bookings.txt");
@@ -754,7 +764,7 @@ int Cancel_Booking(int UID) {
     printf("Booking Updated successfully...\n");
     printf("%s\n",Top_divider);
     Sleep(600);
-    return 0;
+    return 1;
 }
 
 void Change_status(int UID) {
