@@ -68,6 +68,7 @@ void Activity_View();
 void Booking_Costing(int UID,int Hours);
 int Grab_Bookings(int UID,int Fetch_type);
 int Read_Line(FILE *file,double Line_Num);
+void Change_status(int UID);
 
 //to make
 int Cancel_Booking(int UID);
@@ -77,6 +78,7 @@ void Reports();
 int main(void) {
     int Account = 0;
     //Account = Login();
+    Cancel_Booking(12);
 
     //FILES
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
@@ -534,8 +536,10 @@ void Booking_Costing(int UID,int Hours) {
         printf("\n\t TOTAL = $%.2lf\n\n",Price);
         sprintf(Discount,"%s","NO-Discount");
     }
+
+    printf("\tConfirm Payment Status\n\t1--PAYMENT PAID\n\t2--PENDING PAYMENT");
     while(TRUE) {
-        printf("\t1--PAYMENT PAID\n\t2--PENDING PAYMENT\n ENTER...");
+        printf("\n ENTER...");
         scanf("%s",store);
         sscanf(store,"%d",&paid);
         if (paid > 0 && paid < 3) {
@@ -562,7 +566,7 @@ void Activity_View() {
     //variables
     FILE *READ_Bookings = fopen("Bookings.txt","r");
     int line_num = 2//UID start 3 line away from the top
-    , UID = 1,Hold;
+    , UID = 1,Hold,running = 1;
     char Storage[MAX_LENGTH];
 
     printf("%s%s%s%s\n",
@@ -597,8 +601,9 @@ void Activity_View() {
         printf("Sorry no Bookings Found...\n");
         Sleep(500);
     }else {
-        printf("Enter (-1) to EXIT\n");
+
         while (TRUE) {
+            printf("Enter (-1) to EXIT\n");
             printf(" Enter booking ID...");
             scanf("%s",Storage);
             sscanf(Storage,"%d",&UID);
@@ -619,17 +624,36 @@ void Activity_View() {
 
                     printf("\t\t\t ---------------\n---------------");
                     printf("\t\t\t\t Name: %s %s  \nPress : 1--Confirm Payment \t\t Age: %d\n\t2--Cancel \t\t\t No.# %s \n\t"
-                           "3--Cancel \t\t\t Participants : %d  \n",
+                           "3--Exit \t\t\t Participants : %d  \n",
                            Booking_data.FName,Booking_data.LName,Booking_data.Age,Booking_data.Phone_Num,Booking_data.Participants);
                     printf("\t\t\t\t\t Date : %s \n\t\t\t\t\t Time : %s\n",
                            Booking_data.Date,Booking_data.Time);
                     printf("\t\t\t\t\t Payment Status : %s \n\t\t\t\t\t %s \n\t\t\t\t\t Total Cost :$%0.2lf\n",
                            Receipts_data.Payment_status,Receipts_data.Discount,Receipts_data.Total_Cost);
 
-                    while (TRUE) {
+                    running = 1;
+                    while (running == 1) {
                         printf("Enter...");
                         scanf("%s",Storage);
-                        sscanf(Storage,"%d",&UID);
+                        sscanf(Storage,"%d",&Hold);
+                        switch (Hold) {
+                            case 1:
+                                Change_status(UID);
+                                running = 0;
+                                break;
+                            case 2:
+                                Cancel_Booking(UID);
+                                running = 0;
+                                break;
+                            case 3:
+                                running = 0;
+                                printf("Closing Program...\n");
+                                break;
+                            default:
+                                printf("Invalid Entry\n");
+                                break;
+
+                        }
                     }
 
                 }else{
@@ -641,4 +665,163 @@ void Activity_View() {
 
     fclose(READ_Bookings);
     printf("%s",TAB_divider);
+}
+
+int Cancel_Booking(int UID) {
+    //variables
+    FILE *ED_Bookings = fopen("Bookings.txt", "r");
+    FILE *Temp_file = fopen("temp.txt", "w");
+
+    int line_Num = 2,
+    Current_line = 0,
+    Hold;
+    char Storage[MAX_LENGTH];
+
+    /*char entry_checks[MAX_LENGTH];
+    int entry_counter=0;
+    FILE *Ed_Bookings = fopen("Bookings.txt", "r+");//opens file in both read and write mode
+    if ((Read_Line(Ed_Bookings, 0))!=0) {//reads frist line
+
+        sprintf(entry_checks, "%s", READL);//copies READL
+        entry_checks[strcspn(entry_checks, "\n")] = '\0';// Removes the \n in the str
+
+        sscanf(entry_checks, "%d", &entry_counter);
+        if (entry_counter == 0){
+            entry_counter++;
+            printf("Creating counter....\n");
+            Sleep(600);
+        }
+        else {
+            entry_counter++;
+        }
+
+    }
+    else {
+        entry_counter++;
+        fprintf(Ed_Bookings,"0\n");
+        printf("Creating counter....\n");
+        Sleep(600);
+    }
+    fclose(Ed_Bookings);*/
+
+
+
+    while (Read_Line(ED_Bookings,line_Num)!=0) {
+        sprintf(Storage, "%s",READL);
+        Storage[strcspn(Storage, "U")] = '0';
+        Storage[strcspn(Storage, "I")] = '0';
+        Storage[strcspn(Storage, "D")] = '0';
+        Storage[strcspn(Storage, ";")] = '0';
+        Storage[strcspn(Storage, "\n")] = '\0';//remove \n and UID; from the str
+        sscanf(Storage,"%d",&Hold);
+
+        if (Hold == UID) {
+            break;
+        }
+
+        line_Num = line_Num +11;
+    }
+    if (Read_Line(ED_Bookings,line_Num+11 )==0) {//check if this is the last entry and pushes the pointer back
+        line_Num--;                              //to aviod formating issues
+    }
+
+    rewind(ED_Bookings); // puts the pointer back to the start
+    // copy all contents to the temporary file other except specific line
+    while (!feof(ED_Bookings))
+    {
+        strcpy(Storage, "\0");//empty's the var
+        fgets(Storage, MAX_LENGTH, ED_Bookings);//gets contents of file
+
+        if (!feof(ED_Bookings))
+        {
+
+            if (Current_line >= line_Num  && Current_line <= (line_Num + 10 ))
+            {
+                printf("1");
+            }
+            else
+            {
+                fprintf(Temp_file, "%s", Storage);
+
+            }
+            Current_line++;
+        }
+    }
+    fclose(ED_Bookings);
+    fclose(Temp_file);
+    remove("Bookings.txt");
+    rename("temp.txt", "Bookings.txt");
+    printf("Booking Updated successfully...\n");
+    printf("%s\n",Top_divider);
+    Sleep(600);
+    return 0;
+}
+
+void Change_status(int UID) {
+    //variables
+    FILE *ED_Receipts = fopen("Receipts.txt", "r");
+    FILE *Temp_file = fopen("temp.txt", "w");
+
+    int line_Num = 0,
+    Current_line = 0,
+    Hold;
+    char Storage[MAX_LENGTH];
+    char New_data[MAX_LENGTH] ="80";
+
+    printf("    <<Change Payment Status>>\n\t1--PAYMENT PAID\n\t2--PENDING PAYMENT");
+    while (TRUE) {
+        printf("\n ENTER...");
+        scanf("%s",Storage);
+        sscanf(Storage,"%d",&Hold);
+        if (Hold > 0 && Hold < 3) {
+            if (Hold == 1) {
+                sprintf(New_data, "%s","PAID\n");
+                break;
+            }else {
+                sprintf(New_data, "%s","PENDING\n");
+                break;
+            }
+        }
+    }
+
+
+    while (Read_Line(ED_Receipts,line_Num)!=0) {
+        sprintf(Storage, "%s",READL);
+        Storage[strcspn(Storage, "\n")] = '\0';//remove \n and UID; from the str
+        sscanf(Storage,"%d",&Hold);
+
+        if (Hold == UID) {
+            break;
+        }
+        line_Num = line_Num +8;
+    }
+    rewind(ED_Receipts); // puts the pointer back to the start
+    line_Num = line_Num + 6 ; //gets contents of file
+
+    // copy all contents to the temporary file other except specific line
+    while (!feof(ED_Receipts))
+    {
+        strcpy(Storage, "\0");//empty's the var
+        fgets(Storage, MAX_LENGTH, ED_Receipts);//gets contents of file
+
+        if (!feof(ED_Receipts))
+        {
+            if (Current_line != line_Num)
+            {
+                fprintf(Temp_file, "%s", Storage);
+            }
+            else
+            {
+                fprintf(Temp_file, "%s", New_data);
+            }
+            Current_line++;
+        }
+    }
+    fclose(ED_Receipts);
+    fclose(Temp_file);
+    remove("Receipts.txt");
+    rename("temp.txt", "Receipts.txt");
+    printf("Booking Updated successfully...\n");
+    printf("%s\n",Top_divider);
+    Sleep(600);
 }
