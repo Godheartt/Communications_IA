@@ -59,24 +59,27 @@ const char  Adm_Screen[]  = "\t\t\t1---View Reports\n\t\t\t2---View Current Book
                             "\n\t\t\t4---EXIT\n";
 const char  BC_Subtitle[] = "\t\t\t  Booking Creation\n";
 const char  BCP_Subtitle[]= "\t\t\t  Booking Pricing\n";
+const char  Adm_Subtitle[]= "\t\t       Booking Admin System\n";
+const char  Rep_Subtitle[]= "\t\t\t Booking Reports\n";
 const char  CB_Subtitle[] = "\t\t\t Current Bookings\n";
 
 //Functions
 int Login();
 int Create_Bookings();
 void Activity_View();
+int Cancel_Booking(int UID);
+
+void Create_Employees_logins();
 void Booking_Costing(int UID,int Hours);
 int Grab_Bookings(int UID,int Fetch_type);
 int Read_Line(FILE *file,double Line_Num);
 void Change_status(int UID);
-int Cancel_Booking(int UID);
 
 //to make
-void Create_Employees_logins();
 void Reports();
 
 int main(void) {
-    int Account = 0;
+    int Account = 1;
     //Account = Login();
 
     //FILES
@@ -84,6 +87,8 @@ int main(void) {
     fclose(IN_Bookings);
     FILE *IN_Receipts = fopen("Receipts.txt", "a");
     fclose(IN_Receipts);
+    FILE *IN_Accounts = fopen("Accounts.txt", "a");
+    fclose(IN_Accounts);
 
     //Variables
     char In1[] = "Enter :-",Store[50];
@@ -139,7 +144,7 @@ int main(void) {
             }
         }else {
             printf("%s%s%s%s",
-                Top_Tile,Top_Subtitle,Top_divider,Adm_Screen);
+                Top_Tile,Adm_Subtitle,Top_divider,Adm_Screen);
             while (Checked ==1) {
                 Hold =0;
                 printf("%s",In1);
@@ -147,14 +152,15 @@ int main(void) {
                 sscanf(Store, "%d", &Hold);
                 switch (Hold) {
                     case 1:
+                        Reports();
                         Checked = 0;
                         break;
                     case 2:
-                        Checked = 0;
                         Activity_View();
+                        Checked = 0;
                         break;
                     case 3:
-
+                        Create_Employees_logins();
                         Checked = 0;
                         break;
                     case 4://ends Program
@@ -341,12 +347,11 @@ int Read_Line(FILE *file,double Line_Num) {
 }
 
 
-int Login() {
+int  Login() {
     //Variables
     printf("%s%s%sENTER LOGIN CREDENTIALS\n",Top_Tile,Top_Subtitle,Top_divider);
-    int PASSED = 0;
     char Password[50],Username[50];
-    while (PASSED == 0) {
+    while (TRUE) {
         //INPUTS
         printf("\nPlease Enter Username:");
         scanf("%s",Username);
@@ -366,17 +371,28 @@ int Login() {
                 printf("Successful Login...\n");
                 Sleep(600);
                 printf("%s",TAB_divider);
-                PASSED = 1;
+                return 0;
+            }
+        }else {
+            FILE *RE_Accounts = fopen("Accounts.txt", "r");
+            int line_Num = 0;
+            while (Read_Line(RE_Accounts,line_Num) != 0) {//grabs the username and stops at the end of file
+                READL[strcspn(READL, "\n")] = '\0';//remove \n and UID; from the str
+                 if (strcmp(Username,READL)==0) {
+                     Read_Line(RE_Accounts,line_Num+1);
+                     READL[strcspn(READL, "\n")] = '\0';//remove \n and UID; from the str
+                     if (strcmp(Password,READL)==0) {
+                         printf("Successful Login...\n");
+                         Sleep(600);
+                         printf("%s",TAB_divider);
+                         return 0;
+                     }
+                 }
+                line_Num = line_Num + 3;
             }
         }
-
-
-
-        if (PASSED == 0) {
-            printf("ERROR Incorrect Username or Password\n");
-        }
+        printf("ERROR Incorrect Username or Password\n");
     }
-    return 0;
 }
 
 
@@ -384,7 +400,6 @@ int Grab_Bookings(int UID,int Fetch_type) {
     //Fetch_type 0-reads information on amount of person and activity
     //type       1-reads the Fullname, date and phone number, along with info from type 0
     //type       2-reads ALL Information for booking including Cost, discount and Payment status
-    //type       3-reads Report data
     //the Information is stored in Booking_data
 
     //variables
@@ -418,9 +433,6 @@ int Grab_Bookings(int UID,int Fetch_type) {
     }
     if (found == 1) {
         switch (Fetch_type) {
-            case 3:
-
-                break;
             case 2:
                 READ_Receipts= fopen("Receipts.txt","r");
                 while (Read_Line(READ_Receipts,Receipts_line_Num)!=0) {
@@ -503,9 +515,6 @@ int Grab_Bookings(int UID,int Fetch_type) {
                 sscanf(READL, "%d",&Hold);
                 Booking_data.Participants = Hold;
 
-                /*printf("%d\n%d\n%d\n%s\n%s\n%s\n%s\n%s\n%s\n",
-                    Booking_data.Activity,Booking_data.Participants,Booking_data.Age,Booking_data.FName,Booking_data.LName
-                    ,Booking_data.Date,Booking_data.Time,Booking_data.Email,Booking_data.Phone_Num);*/
                 break;
             default:break;
 
@@ -617,6 +626,8 @@ void Activity_View() {
 
         line_num = line_num +11;
     }
+    fclose(READ_Bookings);
+
     printf("\n%s",Top_divider);
     if (line_num == 2) {
         printf("Sorry no Bookings Found...\n");
@@ -683,8 +694,6 @@ void Activity_View() {
             }
         }
     }
-
-    fclose(READ_Bookings);
     printf("%s",TAB_divider);
 }
 
@@ -741,6 +750,7 @@ int Cancel_Booking(int UID) {
     }
 
     rewind(ED_Bookings); // puts the pointer back to the start
+
     // copy all contents to the temporary file other except specific line
     while (!feof(ED_Bookings))
     {
@@ -757,10 +767,13 @@ int Cancel_Booking(int UID) {
         }
     }
 
+    rewind(ED_Bookings); // puts the pointer back to the start
+
     //write values to the temporary file
     sprintf(entry_checks, "%d", entry_counter );//copies entry_counter
-    fseek(Temp_file, 0, SEEK_SET);//place the writer o the frist line
-    fputs(entry_checks, Temp_file);//writes the contents of entry_checks
+    fseek(Temp_file, 0, SEEK_SET);// places the pointer on the very first bit
+    fprintf(Temp_file, "%d \n", entry_counter);
+    fflush(Temp_file);
 
     fclose(ED_Bookings);
     fclose(Temp_file);
@@ -841,3 +854,79 @@ void Change_status(int UID) {
     Sleep(600);
 }
 
+void Create_Employees_logins() {
+    //Variable
+    int checked = 0 ;
+    char Password[51],Username[51],Storage[51];
+
+
+    Sleep(300);
+    printf("%s",TAB_divider);
+    printf("%s%s%sENTER LOGIN CREDENTIALS\n",
+        Top_Tile,Adm_Subtitle,Top_divider);
+
+    printf("No more the 50 characters\n");
+
+    printf("\tEnter Username: ");
+    scanf("%50s",Username);
+
+    while (TRUE) {
+        printf("\tEnter Password: ");
+        scanf("%50s",Password);
+        checked = 0;
+        while (checked == 0) {
+            printf("Enter (x) to change password or (y) to exit\n"
+                   "\tRe-Enter Password: ");
+            scanf("%50s",Storage);
+            if (strcmp(Password,Storage) == 0) {
+                checked = 1;
+            }else if (strcmp(Storage,"x") == 0) {
+                checked = -1;
+            }else if (strcmp(Storage,"y") == 0) {
+                checked = 2;
+            }
+
+        }
+        if (checked > 0) {
+            break;
+        }
+    }
+
+    if (checked == 1) {
+        FILE *IN_Accounts = fopen("Accounts.txt", "a");
+
+        fprintf(IN_Accounts, "%s\n",Username);
+        fprintf(IN_Accounts, "%s\n\n",Password);
+
+        fclose(IN_Accounts);
+        printf("Account Successfully Created...\n");
+    }
+    printf("%s\n",TAB_divider);
+}
+
+void Reports() {
+    //variables
+    char Storage[MAX_LENGTH],
+    Erasable[2][14]={"Hours :","Participants :"};
+    int  Hold = 0 ,Total_Income,
+    Participants,Total_Hours,
+    line_num = 1;
+
+    FILE *RE_Receipts = fopen("Receipts.txt", "r");
+
+    printf("%s\n",TAB_divider);
+    printf("%s%s%s",
+        Top_Tile,Rep_Subtitle,Top_divider);
+    printf("   Activities \t|   No. Person \t|   Hours used \t|   Total Income \t|\n");
+    for (int i = 0 ; i < 9 ; i++) {
+        while (Read_Line(RE_Receipts,line_num) !=0 ) {
+            for (int count =0; count <9; count++ ) {
+
+            }
+        }
+        printf("   Activities \t|   No. Person \t|   Hours used \t|   Total Income \t|\n");
+    }
+
+    printf("   Activities \t|   No. Person \t|   Hours used \t|   Total Income \t|\n");
+
+}
