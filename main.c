@@ -68,18 +68,16 @@ int Login();
 int Create_Bookings();
 void Activity_View();
 int Cancel_Booking(int UID);
-
 void Create_Employees_logins();
 void Booking_Costing(int UID,int Hours);
 int Grab_Bookings(int UID,int Fetch_type);
 int Read_Line(FILE *file,double Line_Num);
 void Change_status(int UID);
-
-//to make
+void ClearScreen();
 void Reports();
 
 int main(void) {
-    int Account = 1;
+    int Account = 0;
     //Account = Login();
 
     //FILES
@@ -220,9 +218,11 @@ int Create_Bookings() {
     char Questions[9][35] ={"Enter Activity No.#","Frist Name:","Last Name:","Person's age:","Phone No.#","Email Address :"
         ,"Number of persons Booking for:","Booking Date (dd/mm/yyyy) :","Time in (23:00):~"};
 
-    printf("%s%s%s%sActivities\n1--%s\t   2--%s\t\t3--%s\n"
-           "4--%s\t   5--%s\t6--%s\n7--%s\t   8--%s\t9--%s\n\nEnter clients Info:\n",
-        TAB_divider,Top_Tile,BC_Subtitle,Top_divider,acts[0],acts[1],acts[2],acts[3],acts[4],acts[5],acts[6]
+    printf("%s",TAB_divider);
+    ClearScreen();//clears the screen in cmd
+    printf("%s%s%sActivities\n1--%s\t   2--%s\t\t3--%s\n"
+           "4--%s\t   5--%s\t6--%s\n7--%s\t   8--%s\t9--%s\n\nEnter clients Info:\n"
+        ,Top_Tile,BC_Subtitle,Top_divider,acts[0],acts[1],acts[2],acts[3],acts[4],acts[5],acts[6]
         ,acts[7],acts[8]);
     //print the screen along with activities
 
@@ -330,6 +330,15 @@ int Create_Bookings() {
 
 }
 
+//ClearScreen
+void ClearScreen() {
+    Sleep(25);// wait before...it helps with errors
+    system("cls");//Windows command to clear screen
+    printf("\033[2J\033[H");//ANSI Escape code to clear screen
+    fflush(stdout);//flush output stream
+    //The two clear are done for compatibility with my complier
+    Sleep(25);// wait for the clear before continuing
+}
 
 int Read_Line(FILE *file,double Line_Num) {
     char FILE_Storage[MAX_LENGTH];
@@ -364,6 +373,7 @@ int  Login() {
                 printf("Successful Login...\n");
                 Sleep(600);
                 printf("%s",TAB_divider);
+                ClearScreen();//clears the screen in cmd
                 return 1;
             }
         }else if (strcmp(Username,Default_Employee_Username)==0) {
@@ -371,6 +381,7 @@ int  Login() {
                 printf("Successful Login...\n");
                 Sleep(600);
                 printf("%s",TAB_divider);
+                ClearScreen();//clears the screen in cmd
                 return 0;
             }
         }else {
@@ -385,6 +396,7 @@ int  Login() {
                          printf("Successful Login...\n");
                          Sleep(600);
                          printf("%s",TAB_divider);
+                         ClearScreen();//clears the screen in cmd
                          return 0;
                      }
                  }
@@ -446,7 +458,7 @@ int Grab_Bookings(int UID,int Fetch_type) {
                 }
                 //gets info for Total
                 Read_Line(READ_Receipts,Receipts_line_Num+5);
-                sscanf(READL, "%lf",&Holder);
+                Holder = atof(READL);
                 Receipts_data.Total_Cost = Holder;
                 //gets info for Discount
                 Read_Line(READ_Receipts,Receipts_line_Num+4);
@@ -525,7 +537,9 @@ int Grab_Bookings(int UID,int Fetch_type) {
 }
 
 void Booking_Costing(int UID,int Hours) {
-    printf("%s%s%s%s",TAB_divider,Top_Tile,BCP_Subtitle,Top_divider);
+    printf("%s",TAB_divider);
+    ClearScreen();//clears the screen in cmd
+    printf("%s%s%s",Top_Tile,BCP_Subtitle,Top_divider);
     double Price;
     int paid = 1;
     char percent_sign = '%',store[1],Discount[50];
@@ -592,109 +606,127 @@ void Booking_Costing(int UID,int Hours) {
 void Activity_View() {
 
     //variables
-    FILE *READ_Bookings = fopen("Bookings.txt","r");
-    int line_num = 2//UID start 3 line away from the top
-    , UID = 1,Hold,running = 1;
+    FILE *READ_Bookings;
+    int line_num //UID start 3 line away from the top
+    , UID = 1,Hold,running_2,
+    running_0 = 1, running_1;
     char Storage[MAX_LENGTH];
 
-    printf("%s%s%s%s\n",
-                TAB_divider,Top_Tile,CB_Subtitle,Top_divider);
+    printf("%s",TAB_divider);
+    ClearScreen();//clears the screen in cmd
+    printf("%s%s%s\n",
+                Top_Tile,CB_Subtitle,Top_divider);
 
-    while (Read_Line(READ_Bookings, line_num)!=0) {
-        if (line_num != 2) {//for better looking GUI
-            printf("%s",View_divider);
-        }
-        //Get UID
-        sprintf(Storage, "%s",READL);
-        Storage[strcspn(Storage, "U")] = '0';
-        Storage[strcspn(Storage, "I")] = '0';
-        Storage[strcspn(Storage, "D")] = '0';
-        Storage[strcspn(Storage, ";")] = '0';
-        Storage[strcspn(Storage, "\n")] = '\0';//remove \n and UID; from the str
-        sscanf(Storage,"%d",&UID);
+    while (running_0 == 1) {
+        READ_Bookings = fopen("Bookings.txt","r");
+        line_num = 2;
 
-        //Get Some Booking Data
-        Grab_Bookings(UID,1);
-        if (Booking_data.Activity == 9) {
-            printf("%s \t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
-        }else if (Booking_data.Activity == 5) {
-            printf("%s \t\t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
-        }else{
-            printf("%s \t\t\t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
-        }
-        printf(" %s %s , %s , %s\n",Booking_data.FName,Booking_data.LName,Booking_data.Phone_Num,Booking_data.Date);
-
-        line_num = line_num +11;
-    }
-    fclose(READ_Bookings);
-
-    printf("\n%s",Top_divider);
-    if (line_num == 2) {
-        printf("Sorry no Bookings Found...\n");
-        Sleep(500);
-    }else {
-
-        while (TRUE) {
-            printf("Enter (-1) to EXIT\n");
-            printf(" Enter booking ID...");
-            scanf("%s",Storage);
-            sscanf(Storage,"%d",&UID);
-            if (UID == -1) {
-                printf("Closing Program...\n");
-                Sleep(500);
-                break;
+        while (Read_Line(READ_Bookings, line_num)!=0) {
+            if (line_num != 2) {//for better looking GUI
+                printf("%s",View_divider);
             }
-            if (UID != 0){
-                if (Grab_Bookings(UID,2) != 0) {
-                    printf("%s\n",Top_divider);
-                    if (Booking_data.Activity ) {
-                        printf("Event Booked : %s \t Booking Details \nBooking UID# %d ",
-                               acts[Booking_data.Activity-1],UID);
-                    }else{
-                        printf("Event Booked : %s \t\t\t Booking Details \nBooking UID# %d ",
-                               acts[Booking_data.Activity-1],UID);}
+            //Get UID
+            sprintf(Storage, "%s",READL);
+            Storage[strcspn(Storage, "U")] = '0';
+            Storage[strcspn(Storage, "I")] = '0';
+            Storage[strcspn(Storage, "D")] = '0';
+            Storage[strcspn(Storage, ";")] = '0';
+            Storage[strcspn(Storage, "\n")] = '\0';//remove \n and UID; from the str
+            sscanf(Storage,"%d",&UID);
 
-                    printf("\t\t\t ---------------\n---------------");
-                    printf("\t\t\t\t Name: %s %s  \nPress : 1--Confirm Payment \t\t Age: %d\n\t2--Cancel \t\t\t No.# %s \n\t"
-                           "3--Exit \t\t\t Participants : %d  \n",
-                           Booking_data.FName,Booking_data.LName,Booking_data.Age,Booking_data.Phone_Num,Booking_data.Participants);
-                    printf("\t\t\t\t\t Date : %s \n\t\t\t\t\t Time : %s\n",
-                           Booking_data.Date,Booking_data.Time);
-                    printf("\t\t\t\t\t Payment Status : %s \n\t\t\t\t\t %s \n\t\t\t\t\t Total Cost :$%0.2lf\n",
-                           Receipts_data.Payment_status,Receipts_data.Discount,Receipts_data.Total_Cost);
+            //Get Some Booking Data
+            Grab_Bookings(UID,1);
+            if (Booking_data.Activity == 9) {
+                printf("%s \t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
+            }else if (Booking_data.Activity == 1) {
+                printf("%s \t\t\t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
+            }else{
+                printf("%s \t\t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
+            }
+            printf(" %s %s , %s , %s\n",Booking_data.FName,Booking_data.LName,Booking_data.Phone_Num,Booking_data.Date);
 
-                    running = 1;
-                    while (running == 1) {
-                        printf("Enter...");
-                        scanf("%s",Storage);
-                        sscanf(Storage,"%d",&Hold);
-                        switch (Hold) {
-                            case 1:
-                                Change_status(UID);
-                                running = 0;
-                                break;
-                            case 2:
-                                Cancel_Booking(UID);
-                                running = 0;
-                                break;
-                            case 3:
-                                running = 0;
-                                printf("Closing Program...\n");
-                                break;
-                            default:
-                                printf("Invalid Entry\n");
-                                break;
+            line_num = line_num +11;
+        }
+        fclose(READ_Bookings);
 
+        printf("\n%s",Top_divider);
+        if (line_num == 2) {
+            printf("Sorry no Bookings Found...\n");
+            Sleep(500);
+        }else {
+            running_1 = 1;
+            while (running_1 == 1) {
+                printf("Enter (-1) to EXIT\n");
+                printf(" Enter booking ID...");
+                scanf("%s",Storage);
+                sscanf(Storage,"%d",&UID);
+                if (UID == -1) {
+                    printf("Closing Program...\n");
+                    Sleep(500);
+                    running_0 = 0;
+                    break;
+                }
+                if (UID != 0){
+                    if (Grab_Bookings(UID,2) != 0) {
+                        printf("%s\n",Top_divider);
+                        if (Booking_data.Activity == 9 ) {
+                            printf("Event Booked : %s \t Booking Details \nBooking UID# %d ",
+                                   acts[Booking_data.Activity-1],UID);
+                        }else if (Booking_data.Activity < 3) {
+                            printf("Event Booked : %s \t\t\t Booking Details \nBooking UID# %d ",
+                                   acts[Booking_data.Activity-1],UID);
+                        }else{
+                            printf("Event Booked : %s \t\t Booking Details \nBooking UID# %d ",
+                                   acts[Booking_data.Activity-1],UID);
                         }
-                    }
 
-                }else{
-                    printf("Error UID Not Found\n");
+                        printf("\t\t\t ---------------\n---------------");
+                        printf("\t\t\t\t Name: %s %s  \nPress : 1--Confirm Payment \t\t Age: %d\n\t2--Cancel \t\t\t No.# %s \n\t"
+                               "3--Exit \t\t\t Participants : %d  \n",
+                               Booking_data.FName,Booking_data.LName,Booking_data.Age,Booking_data.Phone_Num,Booking_data.Participants);
+                        printf("\t\t\t\t\t Date : %s \n\t\t\t\t\t Time : %s\n",
+                               Booking_data.Date,Booking_data.Time);
+                        printf("\t\t\t\t\t Payment Status : %s \n\t\t\t\t\t %s \n\t\t\t\t\t Total Cost :$%0.2lf\n",
+                               Receipts_data.Payment_status,Receipts_data.Discount,Receipts_data.Total_Cost);
+
+                        running_2 = 1;
+                        while (running_2 == 1) {
+                            printf("Enter...");
+                            scanf("%s",Storage);
+                            sscanf(Storage,"%d",&Hold);
+                            switch (Hold) {
+                                case 1:
+                                    Change_status(UID);
+                                    running_1 = 0;
+                                    running_2 = 0;
+                                    ClearScreen();//clears the screen in cmd
+                                    break;
+                                case 2:
+                                    Cancel_Booking(UID);
+                                    running_1 = 0;
+                                    running_2 = 0;
+                                    ClearScreen();//clears the screen in cmd
+                                    break;
+                                case 3:
+                                    running_1 = 0;
+                                    running_2 = 0;
+                                    printf("Closed \n%s",View_divider);
+                                    ClearScreen();//clears the screen in cmd
+                                    break;
+                                default:
+                                    printf("Invalid Entry\n");
+                                    break;
+                            }
+                        }
+                    }else{
+                        printf("Error UID Not Found\n");
+                    }
                 }
             }
         }
     }
     printf("%s",TAB_divider);
+    ClearScreen();//clears the screen in cmd
 }
 
 int Cancel_Booking(int UID) {
@@ -862,6 +894,7 @@ void Create_Employees_logins() {
 
     Sleep(300);
     printf("%s",TAB_divider);
+    ClearScreen();//clears the screen in cmd
     printf("%s%s%sENTER LOGIN CREDENTIALS\n",
         Top_Tile,Adm_Subtitle,Top_divider);
 
@@ -901,32 +934,70 @@ void Create_Employees_logins() {
         fclose(IN_Accounts);
         printf("Account Successfully Created...\n");
     }
-    printf("%s\n",TAB_divider);
+    printf("%s",TAB_divider);
+    ClearScreen();//clears the screen in cmd
 }
 
 void Reports() {
     //variables
-    char Storage[MAX_LENGTH],
-    Erasable[2][14]={"Hours :","Participants :"};
-    int  Hold = 0 ,Total_Income,
-    Participants,Total_Hours,
-    line_num = 1;
+    char Storage[MAX_LENGTH],store[2];
+    const char Erasable[2][15]={"Hours :","Participants :"};
+    int  Hold = 0 ,Act,
+    Participants[9],Total_Hours[9],
+    line_num = 0;
+    double Total_Income[9];
+
 
     FILE *RE_Receipts = fopen("Receipts.txt", "r");
 
-    printf("%s\n",TAB_divider);
+    printf("%s",TAB_divider);
+    ClearScreen();//clears the screen in cmd
     printf("%s%s%s",
         Top_Tile,Rep_Subtitle,Top_divider);
-    printf("   Activities \t|   No. Person \t|   Hours used \t|   Total Income \t|\n");
-    for (int i = 0 ; i < 9 ; i++) {
-        while (Read_Line(RE_Receipts,line_num) !=0 ) {
-            for (int count =0; count <9; count++ ) {
+    printf("   Activities \t\t|   No. Person \t|   Hours used \t|  Total Income\t|\n");
+    while (Read_Line(RE_Receipts,line_num) != 0 ) {
+        store[0] = READL[0];
+        sscanf(store,"%d",&Act);
+        //printf("%d",Act);
 
-            }
+        Read_Line(RE_Receipts,line_num+2);
+        sprintf(Storage, "%s",READL);
+
+        for (int count = 0; count < 14; count++ ) {
+            store[0] = Erasable[1][count];
+            //printf("%s",store);
+            Storage[strcspn(Storage,store)] = '0';
         }
-        printf("   Activities \t|   No. Person \t|   Hours used \t|   Total Income \t|\n");
+        sscanf(Storage,"%d",&Hold);
+        Participants[Act-1] = Participants[Act-1] + Hold;
+
+        Read_Line(RE_Receipts,line_num+1);
+        sprintf(Storage, "%s",READL);
+
+        for (int count = 0; count < 7; count++ ) {
+            store[0] = Erasable[0][count];
+            //printf("%s",store);
+            Storage[strcspn(Storage,store)] = '0';
+        }
+        sscanf(Storage,"%d",&Hold);
+        Total_Hours[Act-1] = Total_Hours[Act-1] + Hold;
+
+        Read_Line(RE_Receipts,line_num+5);
+        Total_Income[Act-1] = Total_Income[Act-1] + atof(READL);
+
+        line_num = line_num + 8;
+    }
+    for (int i = 0; i < 9; i++) {
+        if ( i == 2 || i == 4|| i > 6) {
+            printf("   %s \t| %-10d    | %-10d    | $%-11.2lf  |\n",acts[i],Participants[i],Total_Hours[i],Total_Income[i]);
+        }else {
+            printf("   %s \t\t| %-10d    | %-10d    | $%-11.2lf  |\n",acts[i],Participants[i],Total_Hours[i],Total_Income[i]);
+        }
+
     }
 
-    printf("   Activities \t|   No. Person \t|   Hours used \t|   Total Income \t|\n");
-
+    printf("%sEnter Anything to exit\nEnter...",View_divider);
+    scanf("%s",Storage);
+    printf("%s",TAB_divider);
+    ClearScreen();//clears the screen in cmd
 }
