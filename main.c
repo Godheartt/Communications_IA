@@ -78,7 +78,7 @@ void Reports();
 
 int main(void) {
     int Account = 0;
-    //Account = Login();
+    Account = Login();
 
     //FILES
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
