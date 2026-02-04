@@ -1,4 +1,4 @@
-6 
+5 
 
 UID;12
 Hiking
@@ -43,17 +43,6 @@ ali
 1
 //
 1:30
-
-UID;66
-Kayaking
-ii
-wo
-123
-32
-@.
-3
-//
-:
 
 UID;37
 Scuba Diving

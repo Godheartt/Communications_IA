@@ -78,7 +78,7 @@ void Reports();
 
 int main(void) {
     int Account = 0;
-    Account = Login();
+    //Account = Login();
 
     //FILES
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
@@ -643,7 +643,8 @@ void Activity_View() {
             }else{
                 printf("%s \t\t\t UID;%d\n",acts[Booking_data.Activity-1],UID);
             }
-            printf(" %s %s , %s , %s\n",Booking_data.FName,Booking_data.LName,Booking_data.Phone_Num,Booking_data.Date);
+            sprintf(Storage,"%s %s",Booking_data.FName,Booking_data.LName); //merge for formatting purposes
+            printf(" %-14s , %-12s , %-10s\n",Storage,Booking_data.Phone_Num,Booking_data.Date);
 
             line_num = line_num +11;
         }
@@ -699,19 +700,29 @@ void Activity_View() {
                                     Change_status(UID);
                                     running_1 = 0;
                                     running_2 = 0;
+                                    printf("%s",TAB_divider);
                                     ClearScreen();//clears the screen in cmd
+                                    printf("%s%s%s\n",
+                                                Top_Tile,CB_Subtitle,Top_divider);
                                     break;
                                 case 2:
                                     Cancel_Booking(UID);
                                     running_1 = 0;
                                     running_2 = 0;
+                                    printf("%s",TAB_divider);
                                     ClearScreen();//clears the screen in cmd
+                                    printf("%s%s%s\n",
+                                                Top_Tile,CB_Subtitle,Top_divider);
                                     break;
                                 case 3:
                                     running_1 = 0;
                                     running_2 = 0;
-                                    printf("Closed \n%s",View_divider);
+                                    printf("Closed... \n");
+                                    Sleep(600);
+                                    printf("%s",TAB_divider);
                                     ClearScreen();//clears the screen in cmd
+                                    printf("%s%s%s\n",
+                                                Top_Tile,CB_Subtitle,Top_divider);
                                     break;
                                 default:
                                     printf("Invalid Entry\n");
@@ -933,6 +944,7 @@ void Create_Employees_logins() {
 
         fclose(IN_Accounts);
         printf("Account Successfully Created...\n");
+        Sleep(400);
     }
     printf("%s",TAB_divider);
     ClearScreen();//clears the screen in cmd
