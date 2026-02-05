@@ -788,13 +788,13 @@ int Cancel_Booking(int UID) {
     }
 
 
-    if (Read_Line(ED_Bookings,line_Num+11 )==0) {//check if this is the last entry and pushes the pointer back
+    if (Read_Line(ED_Bookings,line_Num+11 ) == 0) {//check if this is the last entry and pushes the pointer back
         line_Num--;                              //to aviod formating issues
     }
 
     rewind(ED_Bookings); // puts the pointer back to the start
 
-    // copy all contents to the temporary file other except specific line
+    // copy all contents to the temporary file other except specific lines
     while (!feof(ED_Bookings))
     {
         strcpy(Storage, "\0");//empty's the var
