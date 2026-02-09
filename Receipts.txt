@@ -12,7 +12,7 @@ Participants :6
 Cost :$250
 Discounted--25%
 1275.00
-PENDING
+PAID
 
 53
 Hours :2
@@ -20,7 +20,7 @@ Participants :2
 Cost :$75
 NO-Discount
 300.00
-PENDING
+PAID
 
 54
 Hours :3

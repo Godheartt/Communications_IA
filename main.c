@@ -77,8 +77,8 @@ void ClearScreen();
 void Reports();
 
 int main(void) {
-    int Account = 0;
-    //Account = Login();
+    int Account = 1;
+    Account = Login();
 
     //FILES
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
@@ -125,6 +125,7 @@ int main(void) {
                                 Checked = 0;
                                 Sleep(200);
                                 printf("%s",TAB_divider);
+								if (Hold == -1) {ClearScreen();}
                                 break;
                             }else {
                                 printf("Invalid UID\n");
@@ -657,6 +658,7 @@ void Activity_View() {
         }else {
             running_1 = 1;
             while (running_1 == 1) {
+				UID = 0;
                 printf("Enter (-1) to EXIT\n");
                 printf(" Enter booking ID...");
                 scanf("%s",Storage);
@@ -669,7 +671,10 @@ void Activity_View() {
                 }
                 if (UID != 0){
                     if (Grab_Bookings(UID,2) != 0) {
-                        printf("%s\n",Top_divider);
+                        printf("%s",TAB_divider);
+                        ClearScreen();//clears the screen in cmd
+                        printf("%s%s%s\n",
+                                                Top_Tile,CB_Subtitle,Top_divider);
                         if (Booking_data.Activity == 9 ) {
                             printf("Event Booked : %s \t Booking Details \nBooking UID# %d ",
                                    acts[Booking_data.Activity-1],UID);
