@@ -77,8 +77,8 @@ void ClearScreen();
 void Reports();
 
 int main(void) {
-    int Account = 0;
-    Account = Login();
+    int Account = 1;
+    //Account = Login();
 
     //FILES
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
@@ -125,8 +125,7 @@ int main(void) {
                                 Checked = 0;
                                 Sleep(200);
                                 printf("%s",TAB_divider);
-								if (Hold == -1) {ClearScreen();}
-                                break;
+                                ClearScreen();
                             }else {
                                 printf("Invalid UID\n");
                             }
@@ -602,6 +601,8 @@ void Booking_Costing(int UID,int Hours) {
             break;
         }
     }
+    printf("%s",TAB_divider);
+    ClearScreen();//clears the screen in cmd
 }
 
 void Activity_View() {
@@ -829,7 +830,7 @@ int Cancel_Booking(int UID) {
     rename("temp.txt", "Bookings.txt");
     printf("Booking Cancelled successfully...\n");
     printf("%s\n",Top_divider);
-    Sleep(600);
+    Sleep(700);
     return 1;
 }
 
@@ -973,34 +974,48 @@ void Reports() {
         Top_Tile,Rep_Subtitle,Top_divider);
     printf("   Activities \t\t|   No. Person \t|   Hours used \t|  Total Income\t|\n");
     while (Read_Line(RE_Receipts,line_num) != 0 ) {
+        //gets activity
         store[0] = READL[0];
         sscanf(store,"%d",&Act);
-        //printf("%d",Act);
 
-        Read_Line(RE_Receipts,line_num+2);
-        sprintf(Storage, "%s",READL);
+        //Gets the status of the receipts to check if it was paid
+        Read_Line(RE_Receipts,line_num+6);
+        if (strcmp(READL,"PAID\n") ==0 ) {
 
-        for (int count = 0; count < 14; count++ ) {
-            store[0] = Erasable[1][count];
-            //printf("%s",store);
-            Storage[strcspn(Storage,store)] = '0';
+            //gets Participants
+            Read_Line(RE_Receipts,line_num+2);
+            sprintf(Storage, "%s",READL);
+
+            //deletes the words
+            for (int count = 0; count < 14; count++ ) {
+                store[0] = Erasable[1][count];
+                //printf("%s",store);
+                Storage[strcspn(Storage,store)] = '0';
+            }
+
+            //Adds all participants to that of the activity
+            sscanf(Storage,"%d",&Hold);
+            Participants[Act-1] = Participants[Act-1] + Hold;
+
+            //gets Hours
+            Read_Line(RE_Receipts,line_num+1);
+            sprintf(Storage, "%s",READL);
+
+
+            //deletes the words
+            for (int count = 0; count < 7; count++ ) {
+                store[0] = Erasable[0][count];
+                //printf("%s",store);
+                Storage[strcspn(Storage,store)] = '0';
+            }
+
+            //Adds all Hours to that of the
+            sscanf(Storage,"%d",&Hold);
+            Total_Hours[Act-1] = Total_Hours[Act-1] + Hold;
+
+            Read_Line(RE_Receipts,line_num+5);//gets income
+            Total_Income[Act-1] = Total_Income[Act-1] + atof(READL);//adds income
         }
-        sscanf(Storage,"%d",&Hold);
-        Participants[Act-1] = Participants[Act-1] + Hold;
-
-        Read_Line(RE_Receipts,line_num+1);
-        sprintf(Storage, "%s",READL);
-
-        for (int count = 0; count < 7; count++ ) {
-            store[0] = Erasable[0][count];
-            //printf("%s",store);
-            Storage[strcspn(Storage,store)] = '0';
-        }
-        sscanf(Storage,"%d",&Hold);
-        Total_Hours[Act-1] = Total_Hours[Act-1] + Hold;
-
-        Read_Line(RE_Receipts,line_num+5);
-        Total_Income[Act-1] = Total_Income[Act-1] + atof(READL);
 
         line_num = line_num + 8;
     }
