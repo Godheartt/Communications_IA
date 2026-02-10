@@ -77,7 +77,7 @@ void ClearScreen();
 void Reports();
 
 int main(void) {
-    int Account = 1;
+    int Account = 0;
     Account = Login();
 
     //FILES
