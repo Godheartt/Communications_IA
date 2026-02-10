@@ -77,8 +77,8 @@ void ClearScreen();
 void Reports();
 
 int main(void) {
-    int Account = 1;
-    //Account = Login();
+    int Account = 0;
+    Account = Login();
 
     //FILES
     FILE *IN_Bookings = fopen("Bookings.txt", "a");
